@@ -1,0 +1,5 @@
+db.url=
+db.username=
+db.password=
+db.pool.max-size=
+db.pool.min-idle=
