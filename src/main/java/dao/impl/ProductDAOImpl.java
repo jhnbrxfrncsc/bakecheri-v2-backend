@@ -3,6 +3,7 @@ package dao.impl;
 import config.DatabaseConfig;
 import dao.ProductDAO;
 import entity.Product;
+import exception.DatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,21 +34,38 @@ public class ProductDAOImpl implements ProductDAO {
     FROM products
     """;
 
+    private static final String FIND_BY_ID_SQL =
+        SELECT_PRODUCT_COLUMNS + " WHERE id = ?;";
+
+    private static final String FIND_POPULAR_SQL =
+        SELECT_PRODUCT_COLUMNS + " WHERE is_popular IS TRUE;";
+
+    private static final String FIND_BY_CATEGORY_SQL =
+        SELECT_PRODUCT_COLUMNS + " WHERE LOWER(category) = LOWER(?);";
+
+    private static final String SEARCH_SQL =
+        SELECT_PRODUCT_COLUMNS + """
+            WHERE LOWER(name) LIKE LOWER(?) 
+            OR LOWER(description) LIKE LOWER(?) 
+            OR LOWER(category) LIKE LOWER(?);
+            """;
+
     @Override
     public List<Product> findAll() {
         List<Product> products = new ArrayList<>();
-
         try (
                 Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(SELECT_PRODUCT_COLUMNS);
                 ResultSet rs = ps.executeQuery()
         ) {
             while (rs.next()) {
+                logger.debug("findAll() -- Mapping product {}", rs.getLong("id"));
                 products.add(mapRow(rs));
             }
-
-        } catch (SQLException e) {
-            logger.error("Failed to retrieve products", e);
+            logger.info("findAll() -- Retrieved {} products", products.size());
+        } catch (SQLException se) {
+            logger.error("ProductDAOImpl#findAll() -- Failed to retrieve products", se);
+            throw new DatabaseException("Failed to retrieve products");
         }
 
         return products;
@@ -55,30 +73,105 @@ public class ProductDAOImpl implements ProductDAO {
 
     @Override
     public Optional<Product> findById(Long id) {
-        logger.info("ProductDAOImpl#findById({}) - start", id);
-        String sql = SELECT_PRODUCT_COLUMNS + " WHERE id = ?";
-
+        logger.info("ProductDAOImpl#findById({}) -- START", id);
         try (
                 Connection conn = DatabaseConfig.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);
+                PreparedStatement ps = conn.prepareStatement(FIND_BY_ID_SQL);
         ) {
             logger.info("ProductDAOImpl#findById({}) - setting {} id to ps.", id, id);
             ps.setLong(1, id);
 
-            logger.info("ProductDAOImpl#findById({}) - executing query....", id);
             try(ResultSet rs = ps.executeQuery()){
-            logger.info("ProductDAOImpl#findById({}) : rs = {}", id, rs.toString());
                 if (rs.next()) {
-                    logger.info("ProductDAOImpl#findById({}) - successful....", id);
+                    logger.debug("findById() -- Mapping product {}", rs.getLong("id"));
                     return Optional.of(mapRow(rs));
                 }
             }
 
-        } catch (SQLException e) {
-            logger.error("Failed to retrieve product with id {}", id, e);
+        } catch (SQLException se) {
+            logger.error("Failed to retrieve product with id {}", id, se);
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public List<Product> findPopular() {
+        logger.info("ProductDAOImpl#findPopular() -- START");
+        List<Product> popularProducts = new ArrayList<>();
+        try(
+            Connection conn = DatabaseConfig.getConnection();
+            PreparedStatement ps = conn.prepareStatement(FIND_POPULAR_SQL);
+            ResultSet rs = ps.executeQuery()
+        ) {
+            while(rs.next()) {
+                logger.debug("findPopular() -- Mapping product {}", rs.getLong("id"));
+                popularProducts.add(mapRow(rs));
+            }
+            logger.info("findPopular() -- Retrieved {} products", popularProducts.size());
+        } catch(SQLException se) {
+            logger.error("Failed to retrieve popular product/s", se);
+        }
+
+        logger.info("ProductDAOImpl#findPopular() -- END");
+        return popularProducts;
+    }
+
+    @Override
+    public List<Product> findByCategory(String category) {
+        logger.info("ProductDAOImpl#findByCategory({}) -- START", category);
+        List<Product> products = new ArrayList<>();
+
+        try(
+                Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(FIND_BY_CATEGORY_SQL);
+                ) {
+            ps.setString(1, category);
+            try(ResultSet rs = ps.executeQuery()){
+                while(rs.next()) {
+                    logger.debug("findByCategory() -- Mapping product {}", rs.getLong("id"));
+                    products.add(mapRow(rs));
+                }
+                logger.info("findByCategory() -- Retrieved {} products", products.size());
+            } catch(SQLException se){
+                logger.error("ProductDAOImpl#findByCategory() -- query execution failed.", se);
+            }
+        } catch(SQLException se) {
+            logger.error("ProductDAOImpl#findByCategory() -- failed to retrieve products with {} category.", category, se);
+        }
+
+        logger.info("ProductDAOImpl#findByCategory() -- END");
+        return products;
+    }
+
+    @Override
+    public List<Product> search(String keyword) {
+        logger.info("ProductDAOImpl#search({}) -- START", keyword);
+        List<Product> searchedProducts = new ArrayList<>();
+
+        try(
+                Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(SEARCH_SQL);
+                ){
+            ps.setString(1, "%" + keyword + "%");
+            ps.setString(2, "%" + keyword + "%");
+            ps.setString(3, "%" + keyword + "%");
+
+            try(ResultSet rs = ps.executeQuery()){
+                while(rs.next()) {
+                    logger.debug("search() - Mapping product {}", rs.getLong("id"));
+                    searchedProducts.add(mapRow(rs));
+                }
+                logger.info("search() - Retrieved {} products", searchedProducts.size());
+            } catch(SQLException se){
+                logger.error("ProductDAOImpl#search({}) -- query execution failed.", keyword, se);
+            }
+
+        } catch (SQLException se) {
+            logger.error("ProductDAOImpl#search() -- Failed to fetch products name/description/category with {}.", keyword, se);
+        }
+
+        return searchedProducts;
     }
 
     private Product mapRow(ResultSet rs) throws SQLException {

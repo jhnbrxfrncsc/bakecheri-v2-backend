@@ -1,5 +1,6 @@
 package util;
 
+import dto.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
@@ -9,27 +10,22 @@ public final class HttpResponseUtil {
     private HttpResponseUtil() {
     }
 
-    public static void writeJsonResponse(
-            HttpServletResponse response,
-            int statusCode,
-            Object body) throws IOException {
+    public static void ok(HttpServletResponse response, Object data, String message) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.setStatus(statusCode);
+        response.setStatus(HttpServletResponse.SC_OK);
 
-        JsonUtil.mapper().writeValue(response.getWriter(), body);
+        JsonUtil.mapper().writeValue(response.getWriter(), new ApiResponse<>(true, data, message));
     }
 
     public static void writeError(
             HttpServletResponse response,
             int statusCode,
             String message) throws IOException {
-        String json = "{\"message\":\"" + message + "\"}";
-
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(statusCode);
 
-        response.getWriter().write(json);
+        JsonUtil.mapper().writeValue(response.getWriter(), new ApiResponse<>(false, null, message));
     }
 }

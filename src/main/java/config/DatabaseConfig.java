@@ -85,24 +85,4 @@ public class DatabaseConfig {
         }
     }
 
-    private static Properties loadProperties(){
-        Properties properties = new Properties();
-
-        try (InputStream input = DatabaseConfig.class
-                .getClassLoader()
-                .getResourceAsStream("application.properties")) {
-
-            if (input == null) {
-                throw new RuntimeException("application.properties not found.");
-            }
-
-            properties.load(input);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load application.properties", e);
-        }
-
-        return properties;
-    }
-
 }
