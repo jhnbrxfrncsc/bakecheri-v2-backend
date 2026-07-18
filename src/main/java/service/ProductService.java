@@ -1,6 +1,8 @@
 package service;
 
-import dto.ProductDTO;
+import dto.request.UpdateProductRequest;
+import dto.response.ProductResponse;
+import dto.request.CreateProductRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +14,7 @@ public interface ProductService {
      *
      * @return never {@code null}; returns an empty list if no products exist.
      */
-    List<ProductDTO> findAll();
+    List<ProductResponse> findAll();
 
     /**
      * get single product by id
@@ -20,9 +22,9 @@ public interface ProductService {
      * @param id id
      * @return {@link Optional}
      * @see Optional
-     * @see ProductDTO
+     * @see ProductResponse
      */
-    Optional<ProductDTO> findById(Long id);
+    ProductResponse findById(Long id);
 
 
     /**
@@ -30,7 +32,7 @@ public interface ProductService {
      *
      * @return popular products, or an empty list if none exist
      */
-    List<ProductDTO> findPopular();
+    List<ProductResponse> findPopular();
 
     /**
      Retrieves products belonging to the given category.
@@ -38,7 +40,7 @@ public interface ProductService {
      * @param category product category
      * @return matching products, or an empty list if none exist
      */
-    List<ProductDTO> findByCategory(String category);
+    List<ProductResponse> findByCategory(String category);
 
     /**
      * Retrieves all products (name/description/category) by keyword
@@ -46,5 +48,32 @@ public interface ProductService {
      * @param keyword keyword
      * @return matching products, or an empty list if none exist
      */
-    List<ProductDTO> search(String keyword);
+    List<ProductResponse> search(String keyword);
+
+
+    /**
+     * Checks if the product name is existing
+     *
+     * @param name product name
+     * @return {@link boolean}
+     */
+    boolean existsByName(String name);
+
+
+    /**
+     * New product creation.
+     *
+     * @param createProductRequest CreateProductRequest
+     * @return created product's ID
+     */
+    Long create(CreateProductRequest createProductRequest);
+
+    /**
+     * Update existing product record.
+     *
+     * @param updateProductRequest updateProductRequest
+     * @return ProductResponse
+     */
+    ProductResponse update(UpdateProductRequest updateProductRequest);
+
 }

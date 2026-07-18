@@ -1,8 +1,8 @@
-package dto;
+package dto.response;
 
 import java.math.BigDecimal;
 
-public class ProductDTO {
+public class ProductResponse {
     private Long id;
     private String name;
     private String description;
@@ -11,9 +11,9 @@ public class ProductDTO {
     private String imageUrl;
     private boolean popular;
 
-    public ProductDTO(){}
+    public ProductResponse(){}
 
-    public ProductDTO(
+    public ProductResponse(
             Long id,
             String name,
             String description,

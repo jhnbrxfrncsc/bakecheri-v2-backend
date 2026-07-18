@@ -1,7 +1,7 @@
 package servlet;
 
 import dao.impl.ProductDAOImpl;
-import dto.ProductDTO;
+import dto.response.ProductResponse;
 import jakarta.servlet.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +65,7 @@ public class ProductServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        
+
     }
 
     private void handleFindById(HttpServletResponse response, String idParam) throws IOException {
@@ -73,7 +73,7 @@ public class ProductServlet extends HttpServlet {
             long productId = Long.parseLong(idParam);
             logger.info("Finding product with id of '{}'", productId);
 
-            ProductDTO product = productService
+            ProductResponse product = productService
                     .findById(productId)
                     .orElse(null);
             if (product != null) {
@@ -92,7 +92,7 @@ public class ProductServlet extends HttpServlet {
     private void handleFindPopular(HttpServletResponse response) throws IOException {
         logger.info("Retrieving popular products....");
 
-        List<ProductDTO> popularProducts = productService.findPopular();
+        List<ProductResponse> popularProducts = productService.findPopular();
         HttpResponseUtil.ok(response,popularProducts, "Retrieved popular products was successfully fetched.");
 
         logger.info("Popular products sent");
@@ -102,7 +102,7 @@ public class ProductServlet extends HttpServlet {
         String category = categoryParam.trim().toLowerCase();
         logger.info("Retrieving products for category '{}'", category);
 
-        List<ProductDTO> categoryProducts = productService.findByCategory(category);
+        List<ProductResponse> categoryProducts = productService.findByCategory(category);
         String message = !categoryProducts.isEmpty()
                 ? "Retrieving products for category '" + category + "' was successful."
                 : "No existing records for products with '" + category + "'";
@@ -115,7 +115,7 @@ public class ProductServlet extends HttpServlet {
         String keyword = keywordParam.trim().toLowerCase();
         logger.info("Searching products using keyword: '{}'", keyword);
 
-        List<ProductDTO> searchedProducts = productService.search(keyword);
+        List<ProductResponse> searchedProducts = productService.search(keyword);
         String message = !searchedProducts.isEmpty()
                 ? "Retrieving products using '" + keyword + "' was successful."
                 : "No existing records for products with '" + keyword + "' keyword";
@@ -127,7 +127,7 @@ public class ProductServlet extends HttpServlet {
     private void handleFindAll(HttpServletResponse response) throws IOException {
         logger.info("Fetching all products....");
 
-        List<ProductDTO> products = productService.findAll();
+        List<ProductResponse> products = productService.findAll();
         HttpResponseUtil.ok(response,products, "Retrieving all products was successful.");
 
         logger.info("All products sent");

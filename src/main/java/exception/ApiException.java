@@ -9,6 +9,11 @@ public class ApiException extends RuntimeException {
         this.statusCode = statusCode;
     }
 
+    protected ApiException(int statusCode, String message, Throwable cause) {
+        super(message, cause);
+        this.statusCode = statusCode;
+    }
+
     public int getStatusCode() {
         return statusCode;
     }

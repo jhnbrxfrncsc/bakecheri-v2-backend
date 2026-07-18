@@ -16,4 +16,10 @@ public interface ProductDAO {
     List<Product> findByCategory(String category);
 
     List<Product> search(String keyword);
+
+    boolean existsByName(String name);
+
+    Long create(Product product);
+
+    Optional<Product> update(Product product);
 }
