@@ -77,6 +77,11 @@ public class ProductServlet extends HttpServlet {
         handleUpdate(request, response);
     }
 
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        handleDelete(request, response);
+    }
+
     private void handleFindById(HttpServletResponse response, String idParam) throws IOException {
         logger.info("ProductServlet#handleFindById -- START");
         try {
@@ -187,6 +192,34 @@ public class ProductServlet extends HttpServlet {
                 "Successfully updated the '" + updatedProduct.getName() + "' product.");
 
         logger.info("ProductServlet#handleUpdate -- END");
+    }
+
+    private void handleDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("ProductServlet#handleDelete -- START");
+        String idParam = request.getParameter("id");
+
+        if (!ValidationUtils.hasValue(idParam)) {
+            HttpResponseUtil.badRequest(response, "Product id is required");
+            return;
+        }
+
+        Long productId;
+        try {
+            productId = Long.parseLong(idParam);
+        } catch (NumberFormatException e) {
+            HttpResponseUtil.badRequest(response, "Invalid product id");
+            return;
+        }
+
+        productService.delete(productId);
+
+        HttpResponseUtil.ok(
+                response,
+                null,
+                "Successfully deleted product with id: '" + productId + "'"
+        );
+
+        logger.info("ProductServlet#handleDelete -- END");
     }
 
 }

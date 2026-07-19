@@ -66,4 +66,11 @@ public interface ProductService {
      */
     ProductResponse update(UpdateProductRequest updateProductRequest);
 
+    /**
+     * Delete a product record.
+     *
+     * @param id product id
+     */
+    void delete(Long id);
+
 }

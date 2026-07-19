@@ -4,7 +4,6 @@ import config.DatabaseConfig;
 import dao.ProductDAO;
 import entity.Product;
 import exception.DatabaseException;
-import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +83,8 @@ public class ProductDAOImpl implements ProductDAO {
             WHERE id = ?
             RETURNING *;
         """;
+
+    private static final String DELETE_SQL = "DELETE FROM products WHERE id = ?";
 
     @Override
     public List<Product> findAll() {
@@ -219,6 +220,30 @@ public class ProductDAOImpl implements ProductDAO {
         return searchedProducts;
     }
 
+    @Override
+    public boolean delete(Long productId){
+        logger.info("Executing DELETE for product {}", productId);
+        try (
+            Connection conn = DatabaseConfig.getConnection();
+            PreparedStatement ps = conn.prepareStatement(DELETE_SQL)
+        ) {
+            ps.setLong(1, productId);
+
+            int affectedRows = ps.executeUpdate();
+
+            logger.info(
+                    "Deleted {} row(s) for product id={}",
+                    affectedRows,
+                    productId
+            );
+
+            return affectedRows > 0;
+        } catch(SQLException se) {
+            logger.error("delete() -- Failed to delete product with '{}' id", productId, se);
+            throw new DatabaseException("Failed to delete product with id " + productId, se);
+        }
+    }
+
     public boolean existsByName(String name){
         logger.info("ProductDAOImpl#existsByName({}) -- START", name);
         try(
@@ -313,9 +338,9 @@ public class ProductDAOImpl implements ProductDAO {
                     logger.debug("update() -- Mapping product {}", rs.getLong(1));
                     return Optional.of(mapRow(rs));
                 }
-            } catch(PSQLException pse) {
-                logger.error("update() -- Failed to fetch product '{}'", product.getName(), pse);
-                throw new DatabaseException("Unable to update product", pse);
+            } catch(SQLException se) {
+                logger.error("update() -- Failed to fetch product '{}'", product.getName(), se);
+                throw new DatabaseException("Unable to update product", se);
             }
         } catch(SQLException se) {
             logger.error("An error was occurred in database connection");

@@ -59,7 +59,6 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper.toDTOs(productDAO.search(keyword));
     }
 
-
     @Override
     public Long create(CreateProductRequest reqProduct){
         logger.info("Creating product: {}", reqProduct);
@@ -126,6 +125,15 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper.toDTO(updatedProduct);
     }
 
+    @Override
+    public void delete(Long productId) {
+        logger.info("Deleting product with id: {}", productId);
+
+        if( !productDAO.delete(productId) ) {
+            logger.warn("Product '{}' not found", productId);
+            throw new ResourceNotFoundException("Product with id '" + productId + "' not found");
+        }
+    }
 
     /* PRIVATE METHODS */
     private Product getSingleProduct(Long productId){

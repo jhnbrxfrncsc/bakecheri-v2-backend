@@ -24,4 +24,6 @@ public interface ProductDAO {
     Long create(Product product);
 
     Optional<Product> update(Product product);
+
+    boolean delete(Long id);
 }
