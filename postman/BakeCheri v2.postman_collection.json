@@ -1,0 +1,173 @@
+{
+  "info": {
+    "_postman_id": "d3f618b6-91c9-4626-8702-69e48428b85c",
+    "name": "BakeCheri v2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "15594727"
+  },
+  "item": [
+    {
+      "name": "/products",
+      "item": [
+        {
+          "name": "GET products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/BakeCheri_v2/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "BakeCheri_v2",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "2",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "id",
+                  "value": "547",
+                  "description": "Non existing id",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "popular",
+                  "value": "true",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "pastry",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "ERROR",
+                  "description": "Non existing category",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "loaf",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "12431254hyu891wy5tr897",
+                  "description": "Empty",
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST products",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "// {\r\n//     \"name\": \"Sourdough Loaf\",\r\n//     \"description\": \"Traditional artisan sourdough with a crispy crust.\",\r\n//     \"price\": 220.00,\r\n//     \"category\": \"Bread\",\r\n//     \"stockQuantity\": 15,\r\n//     \"imageUrl\": \"https://placehold.co/600x400\"\r\n// }\r\n{\r\n    \"name\": \"to delete\",\r\n    \"description\": \"to delete 1234567\",\r\n    \"price\": 999.99,\r\n    \"category\": \"delete\",\r\n    \"stockQuantity\": 0,\r\n    \"imageUrl\": \"https://placehold.co/600x400\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/BakeCheri_v2/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "BakeCheri_v2",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT products",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": \"26\",\r\n    \"name\": \"Sourdough Loaf\",\r\n    \"description\": \"Traditional artisan sourdough with a crispy crust.\",\r\n    \"category\": \"Bread\",\r\n    \"price\": 150.00,\r\n    \"stockQuantity\": 10,\r\n    \"imageUrl\": \"https://placehold.co/600x400\",\r\n    \"popular\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/BakeCheri_v2/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "BakeCheri_v2",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Carrot Cake\",\r\n    \"description\": \"Moist carrot cake topped with smooth cream cheese frosting.\",\r\n    \"category\": \"Cake\",\r\n    \"price\": 870.00,\r\n    \"stockQuantity\": 14,\r\n    \"imageUrl\": \"https://placehold.co/600x400\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/BakeCheri_v2/products?id=28",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "BakeCheri_v2",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "id",
+                  "value": "28"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
