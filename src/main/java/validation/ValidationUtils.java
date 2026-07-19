@@ -89,6 +89,10 @@ public final class ValidationUtils {
         }
     }
 
+    public static boolean hasValue(String value) {
+        return value != null && !value.isBlank();
+    }
+
     /*
        ===========================
        Number Validation

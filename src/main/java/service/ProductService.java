@@ -50,16 +50,6 @@ public interface ProductService {
      */
     List<ProductResponse> search(String keyword);
 
-
-    /**
-     * Checks if the product name is existing
-     *
-     * @param name product name
-     * @return {@link boolean}
-     */
-    boolean existsByName(String name);
-
-
     /**
      * New product creation.
      *

@@ -17,7 +17,7 @@ public final class ProductValidator {
     private ProductValidator() {}
 
     public static void validate(CreateProductRequest reqProduct) {
-        logger.info("Validating CreateProduct: {}", reqProduct);
+        logger.info("Validating CreateProduct: {}", reqProduct.getName());
 
         validateName(reqProduct.getName());
 
@@ -31,11 +31,11 @@ public final class ProductValidator {
 
         validateImageUrl(reqProduct.getImageUrl());
 
-        logger.info("Done validating CreateProduct: {}", reqProduct);
+        logger.info("Done validating CreateProduct: {}", reqProduct.getName());
     }
 
     public static void validate(UpdateProductRequest reqProduct) {
-        logger.info("Validating UpdateProduct: {}", reqProduct);
+        logger.info("Validating UpdateProduct: {}", reqProduct.getName());
 
         if (reqProduct.getName() != null) {
             validateName(reqProduct.getName());
@@ -61,13 +61,13 @@ public final class ProductValidator {
             validateImageUrl(reqProduct.getImageUrl());
         }
 
-        logger.info("Done validating UpdateProduct: {}", reqProduct);
+        logger.info("Done validating UpdateProduct: {}", reqProduct.getName());
     }
 
     public static void validateName(String productName){
-        logger.debug("Validating product name: {}", productName);
+        logger.info("Validating product name: {}", productName);
         ValidationUtils.requireNotBlank(productName, "Name");
-        ValidationUtils.requireLengthBetween(productName, "Name", 3, 20);
+        ValidationUtils.requireLengthBetween(productName, "Name", 3, 30);
     }
 
     public static void validateDescription(String description){

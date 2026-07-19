@@ -1,8 +1,13 @@
 package util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.function.Consumer;
 
 public class UpdateUtil {
+
+    private static final Logger logger = LoggerFactory.getLogger(UpdateUtil.class);
 
     private UpdateUtil(){
         throw new AssertionError("Utility class cannot be instantiated.");
@@ -11,9 +16,16 @@ public class UpdateUtil {
     public static <T> boolean updateIfChanged(
             T newValue,
             T currentValue,
-            Consumer<T> setter
+            Consumer<T> setter,
+            String fieldName
     ) {
         if (newValue != null && !newValue.equals(currentValue)) {
+            logger.info(
+                    "Detected change for field '{}'. Current value: '{}', New value: '{}'",
+                    fieldName,
+                    currentValue,
+                    newValue
+            );
             setter.accept(newValue);
             return true;
         }
@@ -23,11 +35,19 @@ public class UpdateUtil {
     public static boolean updateIfChanged(
             String newValue,
             String currentValue,
-            Consumer<String> setter
+            Consumer<String> setter,
+            String fieldName
     ) {
         if (newValue != null
                 && !newValue.isBlank()
-                && !newValue.equals(currentValue)) {
+                && !newValue.equals(currentValue))
+        {
+            logger.info(
+                    "Updating field '{}': '{}' -> '{}'",
+                    fieldName,
+                    currentValue,
+                    newValue
+            );
             setter.accept(newValue);
             return true;
         }

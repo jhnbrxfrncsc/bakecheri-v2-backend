@@ -6,6 +6,7 @@ import dto.response.ProductResponse;
 import dto.request.CreateProductRequest;
 import entity.Product;
 import exception.DatabaseException;
+import exception.ResourceNotFoundException;
 import exception.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import service.ProductService;
 import mapper.ProductMapper;
 import util.UpdateUtil;
 import validation.ProductValidator;
+import validation.ValidationUtils;
 
 import java.util.List;
 
@@ -59,17 +61,13 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public boolean existsByName(String name) {
-        logger.info("Finding if product '{}' is existing", name);
-        return productDAO.existsByName(name);
-    }
-
-
-    @Override
     public Long create(CreateProductRequest reqProduct){
         logger.info("Creating product: {}", reqProduct);
         // Product validation
         ProductValidator.validate(reqProduct);
+
+        // Throw an exception if product name is already existing.
+        validateProductNameIsUnique(reqProduct.getName());
 
         // Convert to Entity
         Product product = ProductMapper.toEntity(reqProduct);
@@ -81,33 +79,41 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse update(UpdateProductRequest reqProduct) {
-        logger.info("Updating product: {}", reqProduct);
+        logger.info("Updating product....");
 
         // Retrieve existing product record
         Product existingProduct = getSingleProduct(reqProduct.getId());
-        boolean updated = false;
+        boolean hasChanges = false;
 
+        logger.info("Updating product: {}", existingProduct.getName());
         // validate request object
         ProductValidator.validate(reqProduct);
 
         // perform checking of updated values before replacing existing field values.
-        updated |= UpdateUtil.updateIfChanged(
-                reqProduct.getName(), existingProduct.getName(), existingProduct::setName );
-        updated |= UpdateUtil.updateIfChanged(
-                reqProduct.getDescription(), existingProduct.getDescription(), existingProduct::setDescription );
-        updated |= UpdateUtil.updateIfChanged(
-                reqProduct.getCategory(), existingProduct.getCategory(), existingProduct::setCategory );
-        updated |= UpdateUtil.updateIfChanged(
-                reqProduct.getPrice(), existingProduct.getPrice(), existingProduct::setPrice );
-        updated |= UpdateUtil.updateIfChanged(
-                reqProduct.getStockQuantity(), existingProduct.getStockQuantity(), existingProduct::setStockQuantity );
-        updated |= UpdateUtil.updateIfChanged(
-                reqProduct.getImageUrl(), existingProduct.getImageUrl(), existingProduct::setImageUrl );
-        updated |= UpdateUtil.updateIfChanged(
-                reqProduct.getPopular(), existingProduct.isPopular(), existingProduct::setPopular );
+        if (ValidationUtils.hasValue(reqProduct.getName())
+                && !reqProduct.getName().equals(existingProduct.getName())) {
+
+            // throw exception if updated product name is not unique
+            validateProductNameIsUnique(existingProduct.getId(), reqProduct.getName());
+            existingProduct.setName(reqProduct.getName());
+            hasChanges = true;
+        }
+
+        hasChanges |= UpdateUtil.updateIfChanged(
+                reqProduct.getDescription(), existingProduct.getDescription(), existingProduct::setDescription, "Description" );
+        hasChanges |= UpdateUtil.updateIfChanged(
+                reqProduct.getCategory(), existingProduct.getCategory(), existingProduct::setCategory, "Category" );
+        hasChanges |= UpdateUtil.updateIfChanged(
+                reqProduct.getPrice(), existingProduct.getPrice(), existingProduct::setPrice, "Price" );
+        hasChanges |= UpdateUtil.updateIfChanged(
+                reqProduct.getStockQuantity(), existingProduct.getStockQuantity(), existingProduct::setStockQuantity, "Stock Quantity" );
+        hasChanges |= UpdateUtil.updateIfChanged(
+                reqProduct.getImageUrl(), existingProduct.getImageUrl(), existingProduct::setImageUrl, "Image URL" );
+        hasChanges |= UpdateUtil.updateIfChanged(
+                reqProduct.getPopular(), existingProduct.isPopular(), existingProduct::setPopular, "Popular" );
 
         // if there are no updates, convert and return the existing product object.
-        if( !updated ) {
+        if( !hasChanges ) {
             logger.info("No changes for '{}' product", existingProduct.getName());
             return ProductMapper.toDTO(existingProduct);
         }
@@ -125,6 +131,18 @@ public class ProductServiceImpl implements ProductService {
     private Product getSingleProduct(Long productId){
         return productDAO
                 .findById(productId)
-                .orElseThrow(() -> new ValidationException("Product not found with id: " + productId));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+    }
+
+    private void validateProductNameIsUnique(String productName) {
+        if (productDAO.existsByName(productName)) {
+            throw new ValidationException("Product name already exists.");
+        }
+    }
+
+    private void validateProductNameIsUnique(Long productId, String productName) {
+        if (productDAO.existsByNameExcludingId(productName, productId)) {
+            throw new ValidationException("Product name already exists.");
+        }
     }
 }

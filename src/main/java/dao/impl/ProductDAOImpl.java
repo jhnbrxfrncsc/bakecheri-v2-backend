@@ -4,6 +4,7 @@ import config.DatabaseConfig;
 import dao.ProductDAO;
 import entity.Product;
 import exception.DatabaseException;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +56,15 @@ public class ProductDAOImpl implements ProductDAO {
            );
         """;
 
+    private static final String FIND_PRODUCT_NAME_EXCLUDING_ID_SQL = """
+           SELECT EXISTS ( 
+               SELECT 1 
+               FROM products 
+               WHERE name = ?
+               AND id <> ?
+           );
+        """;
+
     private static final String INSERT_SQL = """
             INSERT INTO products (name, description, category, price, stock_quantity, image_url)
             VALUES (?, ?, ?, ?, ?, ?);
@@ -71,7 +81,8 @@ public class ProductDAOImpl implements ProductDAO {
                 image_url=?,
                 is_popular=?,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?;
+            WHERE id = ?
+            RETURNING *;
         """;
 
     @Override
@@ -102,7 +113,6 @@ public class ProductDAOImpl implements ProductDAO {
                 Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(FIND_BY_ID_SQL);
         ) {
-            logger.info("ProductDAOImpl#findById({}) - setting {} id to ps.", id, id);
             ps.setLong(1, id);
 
             try(ResultSet rs = ps.executeQuery()){
@@ -154,7 +164,7 @@ public class ProductDAOImpl implements ProductDAO {
         try(
                 Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(FIND_BY_CATEGORY_SQL);
-                ) {
+        ) {
             ps.setString(1, category);
             try(ResultSet rs = ps.executeQuery()){
                 while(rs.next()) {
@@ -183,7 +193,7 @@ public class ProductDAOImpl implements ProductDAO {
         try(
                 Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(SEARCH_SQL);
-                ){
+        ){
             ps.setString(1, "%" + keyword + "%");
             ps.setString(2, "%" + keyword + "%");
             ps.setString(3, "%" + keyword + "%");
@@ -214,23 +224,34 @@ public class ProductDAOImpl implements ProductDAO {
         try(
                 Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(FIND_PRODUCT_NAME_SQL);
-                ) {
+        ) {
             ps.setString(1, name);
-            try(ResultSet rs = ps.executeQuery()) {
-                if(rs.next()) {
-                    logger.debug("findProductName() -- query execution was successful. Result: {}",rs.getBoolean(1));
-                    return rs.getBoolean(1);
-                }
-            } catch (SQLException se) {
-                logger.error("findProductName() -- query execution failed.", se);
-                throw new DatabaseException("Query execution failed", se);
-            }
+
+            return exists(ps);
+
         } catch (SQLException se) {
             logger.error("existsByName() -- Issue/s encountered in Database Connection.", se);
             throw new DatabaseException("Issue/s encountered in Database Connection", se);
         }
 
-        return false;
+    }
+
+    @Override
+    public boolean existsByNameExcludingId(String name,  Long id){
+        logger.info("ProductDAOImpl#existsByNameExcludingId({}, {}) -- START", name, id);
+        try(
+                Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(FIND_PRODUCT_NAME_EXCLUDING_ID_SQL);
+        ) {
+            ps.setString(1, name);
+            ps.setLong(2, id);
+
+            return exists(ps);
+
+        } catch (SQLException se) {
+            logger.error("existsByNameExcludingId() -- Issue/s encountered in Database Connection.", se);
+            throw new DatabaseException("Issue/s encountered in Database Connection", se);
+        }
     }
 
     public Long create(Product product) {
@@ -292,9 +313,9 @@ public class ProductDAOImpl implements ProductDAO {
                     logger.debug("update() -- Mapping product {}", rs.getLong(1));
                     return Optional.of(mapRow(rs));
                 }
-            } catch(SQLException se) {
-                logger.error("update() -- Failed to fetch product '{}'", product.getName(), se);
-                throw new DatabaseException("Unable to update product", se);
+            } catch(PSQLException pse) {
+                logger.error("update() -- Failed to fetch product '{}'", product.getName(), pse);
+                throw new DatabaseException("Unable to update product", pse);
             }
         } catch(SQLException se) {
             logger.error("An error was occurred in database connection");
@@ -317,6 +338,12 @@ public class ProductDAOImpl implements ProductDAO {
                 rs.getTimestamp("created_at").toLocalDateTime(),
                 rs.getTimestamp("updated_at").toLocalDateTime()
         );
+    }
+
+    private boolean exists(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next() && rs.getBoolean(1);
+        }
     }
 
 //    private String buildUpdateDynamicSQL(Product product) {

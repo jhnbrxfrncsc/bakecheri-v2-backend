@@ -1,6 +1,6 @@
 CREATE TABLE products (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(150) NOT NULL,
+    name VARCHAR(150) NOT NULL UNIQUE,
     description TEXT,
     category VARCHAR(50) NOT NULL,
     price NUMERIC(10,2) NOT NULL,

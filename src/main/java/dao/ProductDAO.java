@@ -19,6 +19,8 @@ public interface ProductDAO {
 
     boolean existsByName(String name);
 
+    boolean existsByNameExcludingId(String name, Long id);
+
     Long create(Product product);
 
     Optional<Product> update(Product product);
