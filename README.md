@@ -1,7 +1,7 @@
-# <center> Introduction </center>
+# <center>Introduction</center>
 >This project is dedicated to migrate my original MERN backend project:<a href="https://bakecheri-client.vercel.app/"> BakeCheri </a> to pure Java Servlets, document every development days, implement production-inspired features, and later evolved the same project into Spring Boot and AWS.
 
-## <center> Tech Stack </center>
+## <center>Tech Stack</center>
 ### Frontend:
 - ReactJS (Deployed in Vercel)
 ### Backend:
@@ -14,7 +14,7 @@
 - Jackson Databind
 - SLF4J
 
-## <center> Features </center>
+## <center>Features</center>
 ## Implemented
 
 ### Product API
@@ -38,7 +38,7 @@
 - Custom exception hierarchy
 - Reusable update utilities
 
-## <center> API Endpoints </center>
+## <center>API Endpoints</center>
 | Method  | Endpoint                  | Description               |
 |---------|---------------------------|---------------------------|
 | GET     | 	/products                | 	Get all products         |
@@ -51,7 +51,7 @@
 | DELETE	 | /products?id=1            | 	Delete product           |
 
 
-## <center> Project Structure </center>
+## <center>Project Structure</center>
 src 
 
 ├── config
@@ -75,7 +75,7 @@ src
 
 └── validation
 
-## <center> Progress </center>
+## <center>Progress</center>
 ## Progress
 
 ### Phase 1 — Backend Foundation
@@ -111,7 +111,7 @@ src
 - [ ] Order Items
 
 
-## <center> Architecture (link) </center>
+## <center>Architecture (link)</center>
 
 Documentation (links)
 
