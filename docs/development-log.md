@@ -621,3 +621,303 @@ Started with reusable low-level validation methods (required fields, blank check
 - Add duplicate product name validation
 - Implement PUT endpoint
 - Add centralized exception handling strategy
+
+---
+---
+
+# Development Log
+
+## <center> DAY FOUR </center>
+
+## Completed
+
+### Product Validation
+- Implemented `ValidationUtils`
+  - Object validation
+  - String validation
+    - requireNotBlank()
+    - requireMinLength()
+    - requireMaxLength()
+    - requireLengthBetween()
+    - requirePattern()
+  - Number validation
+    - requirePositive()
+    - requireNonNegative()
+    - requireBetween()
+  - Collection validation
+    - requireNotEmpty()
+  - Helper methods
+    - hasValue()
+
+- Implemented `ProductValidator`
+  - Validation for `CreateProductRequest`
+  - Validation for `UpdateProductRequest`
+  - Field-specific validation
+    - Product Name
+    - Description
+    - Category
+    - Price
+    - Stock Quantity
+    - Image URL
+
+---
+
+### Product Creation (POST)
+
+Implemented complete Create Product flow.
+
+Request Flow:
+
+Client
+→ ProductServlet
+→ ProductService
+→ ProductValidator
+→ ProductMapper
+→ ProductDAO
+→ PostgreSQL
+
+Implemented:
+
+- `CreateProductRequest`
+- Product validation
+- Duplicate product-name checking
+- Product entity mapping
+- Product persistence
+- Generated ID retrieval using
+  `Statement.RETURN_GENERATED_KEYS`
+- HTTP **201 Created** response
+
+---
+
+### Product Update (PUT)
+
+Implemented complete Update Product flow.
+
+Features:
+
+- Retrieve existing product
+- Partial updates
+- Update only modified fields
+- Name uniqueness validation
+- DTO mapping
+- Persist updated entity
+- Return updated product response
+
+Created:
+
+- `UpdateProductRequest`
+- `UpdateUtil`
+
+`UpdateUtil.updateIfChanged(...)`
+
+Supports:
+
+- Generic types
+- String-specific updates
+- Cleaner update logic
+- Eliminates repetitive null/equality checks
+
+---
+
+### Product Delete (DELETE)
+
+Implemented Delete endpoint.
+
+Flow:
+
+Client
+→ Servlet
+→ Service
+→ DAO
+→ PostgreSQL
+
+Features:
+
+- Validate ID parameter
+- Handle invalid IDs
+- Delete existing product
+- Return ResourceNotFoundException when ID does not exist
+- Return success response when deletion succeeds
+
+---
+
+### DAO Improvements
+
+Added helper queries:
+
+- existsByName()
+- existsByNameExcludingId()
+
+Refactored duplicate query logic into:
+
+- private exists(PreparedStatement)
+
+to eliminate duplicated ResultSet handling.
+
+Improved SQL:
+
+- Used `SELECT EXISTS (...)`
+  instead of counting rows.
+
+---
+
+### Service Layer Improvements
+
+Added business validation:
+
+- Product name uniqueness
+- Product existence checking
+- Separation of validation and persistence responsibilities
+
+Private helper methods:
+
+- validateProductNameIsUnique()
+- getSingleProduct()
+
+---
+
+### Servlet Improvements
+
+Added support for:
+
+- POST
+- PUT
+- DELETE
+
+Improved request handling:
+
+- JSON parsing
+- Invalid JSON handling
+- Request validation
+- Proper HTTP status codes
+- Consistent API responses
+
+---
+
+### API Response
+
+Integrated generic ApiResponse across all Product endpoints.
+
+Successful responses now return:
+
+- success
+- data
+- message
+
+Error responses follow the same structure.
+
+---
+
+## Learned
+
+### Request DTOs vs Response DTOs
+
+Separate request models from response models.
+
+Examples:
+
+- CreateProductRequest
+- UpdateProductRequest
+- ProductResponse
+
+This prevents:
+
+- exposing internal entity structure
+- accidental client-controlled fields
+- unnecessary serialization
+
+---
+
+### Validation belongs in the Service Layer
+
+Servlets should only:
+
+- read requests
+- send responses
+
+Business validation belongs inside services.
+
+---
+
+### Partial Updates
+
+PATCH-like behavior can be implemented in PUT by comparing incoming values against the existing entity before updating.
+
+A reusable helper (`UpdateUtil`) significantly reduces repetitive code.
+
+---
+
+### Using SELECT EXISTS
+
+Instead of:
+
+SELECT COUNT(*)
+
+Use:
+
+SELECT EXISTS(...)
+
+Benefits:
+
+- Stops scanning once a row is found
+- More expressive
+- Better performance for existence checks
+
+---
+
+### RETURN_GENERATED_KEYS
+
+Learned how JDBC retrieves database-generated IDs after INSERT statements using:
+
+Statement.RETURN_GENERATED_KEYS
+
+instead of performing an additional SELECT query.
+
+---
+
+## Problems Encountered
+
+### 1) Designing Validation Before POST Endpoint
+
+Initially attempted to build validation utilities before implementing Create Product.
+
+#### Cause
+
+It was difficult to anticipate which validation methods were actually needed without a real request model.
+
+#### Resolution
+
+Implemented POST first, then allowed the request model to naturally drive the validation utilities.
+
+#### Learned
+
+Validation utilities should evolve from real business requirements rather than trying to predict every future validation rule.
+
+---
+
+### 2) Update Only Modified Fields
+
+Wanted behavior similar to Hibernate's dirty checking.
+
+#### Cause
+
+JDBC updates every column manually.
+
+#### Resolution
+
+Created `UpdateUtil` to compare existing values against incoming values before applying updates.
+
+#### Learned
+
+While JDBC lacks automatic dirty checking, reusable helper utilities can produce a similar developer experience while keeping update logic clean.
+
+---
+
+## Next
+
+- Implement Global Exception Handling
+- Centralize error responses
+- Refactor ProductServlet to remove repetitive try/catch blocks
+- Add Filter and Listener implementations
+- Improve API documentation
+- Begin User module (Authentication)
