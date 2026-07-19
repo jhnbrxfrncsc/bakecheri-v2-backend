@@ -4,7 +4,9 @@ import java.util.function.Consumer;
 
 public class UpdateUtil {
 
-    private UpdateUtil(){}
+    private UpdateUtil(){
+        throw new AssertionError("Utility class cannot be instantiated.");
+    }
 
     public static <T> boolean updateIfChanged(
             T newValue,

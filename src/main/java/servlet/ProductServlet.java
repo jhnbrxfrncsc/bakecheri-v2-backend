@@ -1,6 +1,7 @@
 package servlet;
 
 import dao.impl.ProductDAOImpl;
+import dto.request.CreateProductRequest;
 import dto.response.ProductResponse;
 import jakarta.servlet.http.*;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import service.ProductService;
 import service.impl.ProductServiceImpl;
 import util.HttpResponseUtil;
+import util.JsonUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,8 +39,7 @@ public class ProductServlet extends HttpServlet {
         // Case 2: Get popular products
         if( hasValue(popularParam) ) {
             if ( !popularParam.equalsIgnoreCase("true") ) {
-                HttpResponseUtil.writeError(
-                        response, HttpServletResponse.SC_BAD_REQUEST, "Invalid popular parameter" );
+                HttpResponseUtil.badRequest(response, "Invalid popular parameter" );
                 return;
             }
 
@@ -65,27 +66,47 @@ public class ProductServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("ProductServlet#doPost -- START");
+        CreateProductRequest newProductRequest;
 
+        // Read JSON Body
+        try {
+            newProductRequest = JsonUtil.mapper()
+                    .readValue(request.getReader(), CreateProductRequest.class);
+        } catch (IOException e) {
+            HttpResponseUtil.badRequest(response, "Invalid JSON request body");
+            return;
+        }
+
+        logger.debug("newProductRequest: {}", newProductRequest.getName());
+        Long productId = productService.create(newProductRequest);
+
+        // return ok response along with the ID.
+        HttpResponseUtil.created(
+                response,
+                productId,
+                "Successfully created product. Product ID: '" + productId + "'");
+
+        logger.info("ProductServlet#doPost -- END");
     }
+
 
     private void handleFindById(HttpServletResponse response, String idParam) throws IOException {
         try {
             long productId = Long.parseLong(idParam);
             logger.info("Finding product with id of '{}'", productId);
 
-            ProductResponse product = productService
-                    .findById(productId)
-                    .orElse(null);
+            ProductResponse product = productService.findById(productId);
             if (product != null) {
                 logger.info("Found product: {}", product);
                 HttpResponseUtil.ok(response,product, "Successfully fetched product with '" + product.getId() + "' id");
             } else {
                 logger.info("Product not found");
-                HttpResponseUtil.writeError(response, HttpServletResponse.SC_NOT_FOUND, "Product not found");
+                HttpResponseUtil.notFound(response, "Product not found");
             }
         } catch (NumberFormatException e) {
             logger.info("ProductServlet#doGet -- NumberFormatException: {}", e.getMessage());
-            HttpResponseUtil.writeError(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid product id");
+            HttpResponseUtil.badRequest(response, "Invalid product id");
         }
     }
 

@@ -9,7 +9,9 @@ public class JsonUtil {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    private JsonUtil() {}
+    private JsonUtil() {
+        throw new AssertionError("Utility class cannot be instantiated.");
+    }
 
     public static ObjectMapper mapper() {
         return MAPPER;
