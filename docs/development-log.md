@@ -383,5 +383,241 @@ Large controller methods should coordinate requests, not contain all business lo
     - DELETE
 - Integrate React frontend with Servlet backend.
 
+---
+---
 
+# Development Log
 
+# DAY THREE
+
+## Completed
+
+### Product API Enhancements
+- Added `create(Product)` to `ProductDAO`
+- Started implementing `update(Product)` workflow
+- Added SQL INSERT statement with generated key retrieval using:
+  - `Statement.RETURN_GENERATED_KEYS`
+- Improved database logging for create operations
+- Added custom `DatabaseException` handling for failed inserts
+
+---
+
+### Request / Response DTO Separation
+
+Refactored DTO structure to separate API requests from API responses.
+
+Added:
+
+```
+dto/
+├── request/
+│   ├── CreateProductRequest.java
+│   └── UpdateProductRequest.java
+│
+└── response/
+    └── ProductResponse.java
+```
+
+This separates:
+
+- Incoming client requests
+- Database entities
+- Outgoing API responses
+
+instead of using a single DTO for every layer.
+
+---
+
+### Product Mapper Improvements
+
+Extended `ProductMapper` to support:
+
+- Request DTO → Entity
+- Entity → Response DTO
+
+This keeps mapping logic centralized and prevents duplication throughout the application.
+
+---
+
+### Product Service Refactoring
+
+Updated ProductService and ProductServiceImpl to use the new request/response DTOs.
+
+Implemented:
+
+- create(CreateProductRequest)
+- update(UpdateProductRequest)
+
+Added a reusable private helper:
+
+- getSingleProduct(Long id)
+
+to centralize product existence checking.
+
+---
+
+### Partial Update Utility
+
+Created:
+
+```
+util/
+└── UpdateUtil.java
+```
+
+Provides reusable generic methods for updating entity fields only when values actually changed.
+
+Supports:
+
+- Generic object comparison
+- String comparison (null-safe and blank-safe)
+
+This reduces repetitive update logic inside service classes.
+
+---
+
+### Validation Improvements
+
+Created validation package structure:
+
+```
+validation/
+├── ProductValidator.java
+├── ValidationUtils.java
+└── ValidationResult.java
+```
+
+Implemented initial validation methods including:
+
+- required field validation
+- blank string validation
+
+Prepared validator structure for POST and PUT endpoints.
+
+---
+
+### DAO Improvements
+
+Extended ProductDAO with:
+
+- create(Product)
+- existsByName(String)
+
+Improved DAO exception handling by throwing custom DatabaseExceptions instead of silently returning default values.
+
+---
+
+### Logging Improvements
+
+Improved structured logging throughout:
+
+- Product creation
+- Product retrieval
+- Update workflow
+- Generated key retrieval
+- SQL execution status
+
+---
+
+## Learned
+
+### DTO Separation
+
+Learned why enterprise applications separate:
+
+- Request DTOs
+- Response DTOs
+- Database Entities
+
+instead of exposing database models directly to clients.
+
+Benefits include:
+
+- Better API evolution
+- Stronger encapsulation
+- Safer validation
+- Clear separation of concerns
+
+---
+
+### Dirty Checking
+
+Implemented a lightweight version of manual dirty checking using UpdateUtil.
+
+Only changed fields are copied into the existing entity before persistence.
+
+This mirrors the concept of Hibernate's dirty checking.
+
+---
+
+### Generated Keys
+
+Learned how JDBC retrieves generated IDs using:
+
+```
+Statement.RETURN_GENERATED_KEYS
+```
+
+after INSERT statements.
+
+---
+
+### Service Layer Responsibility
+
+Strengthened the role of the Service layer by making it responsible for:
+
+- validation
+- entity retrieval
+- update comparison
+- mapping
+- persistence orchestration
+
+instead of placing business logic inside DAOs.
+
+---
+
+## Problems Encountered
+
+### 1) Partial UPDATE SQL
+
+#### Problem
+
+Wanted the DAO to update only modified database columns instead of executing a full UPDATE statement.
+
+#### Investigation
+
+Hibernate supports this through dirty checking and optional dynamic updates.
+
+In plain JDBC this requires manually building SQL statements dynamically.
+
+#### Decision
+
+For BakeCheri v2, keep UPDATE statements static for simplicity and maintainability.
+
+Perform change detection inside the Service layer using UpdateUtil before executing the UPDATE.
+
+Dynamic SQL generation may be explored separately as a learning exercise.
+
+---
+
+### 2) Validation Design
+
+#### Problem
+
+Validation utilities were difficult to design before POST and PUT endpoints were fully implemented.
+
+#### Resolution
+
+Started with reusable low-level validation methods (required fields, blank checks) and planned to expand validators alongside endpoint development instead of prematurely implementing every validation rule.
+
+---
+
+## Next
+
+- Finish ProductDAO.update()
+- Implement ProductServlet POST endpoint
+- Add request body parsing using Jackson
+- Implement product creation validation
+- Add duplicate product name validation
+- Implement PUT endpoint
+- Add centralized exception handling strategy
