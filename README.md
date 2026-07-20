@@ -76,7 +76,6 @@ src
 └── validation
 
 ## <center>Progress</center>
-## Progress
 
 ### Phase 1 — Backend Foundation
 

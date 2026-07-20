@@ -1,15 +1,14 @@
 package util;
 
-import dto.request.UpdateProductRequest;
 import exception.BadRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import validation.ValidationUtils;
 
 import java.io.IOException;
 
-public class RequestUtil {
+public class RequestUtils {
 
-    private RequestUtil() {
+    private RequestUtils() {
         throw new AssertionError("Utility class cannot be instantiated.");
     }
 
@@ -17,21 +16,16 @@ public class RequestUtil {
             HttpServletRequest request,
             String parameterName
     ){
-
         String value = request.getParameter(parameterName);
 
         if( !ValidationUtils.hasValue(value)){
-            throw new BadRequestException(
-                    parameterName + " is required."
-            );
+            throw new BadRequestException(parameterName + " is required.");
         }
 
         try{
             return Long.parseLong(value);
         }catch(NumberFormatException ex){
-            throw new BadRequestException(
-                    parameterName + " must be a valid number."
-            );
+            throw new BadRequestException(parameterName + " must be a valid number.");
         }
 
     }

@@ -1,6 +1,5 @@
 package servlet;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import dao.impl.ProductDAOImpl;
 import dto.request.CreateProductRequest;
 import dto.request.UpdateProductRequest;
@@ -11,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import service.ProductService;
 import service.impl.ProductServiceImpl;
 import util.HttpResponseUtil;
-import util.JsonUtil;
+import util.RequestUtils;
 import validation.ValidationUtils;
 
 import java.io.IOException;
@@ -26,6 +25,7 @@ public class ProductServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("ProductServlet#doGet -- START");
 
+        // non-required query params
         final String idParam = request.getParameter("id");
         final String popularParam = request.getParameter("popular");
         final String categoryParam = request.getParameter("category");
@@ -35,7 +35,8 @@ public class ProductServlet extends HttpServlet {
         // Established priority: id -> popular -> category -> search -> findAll
         // Case 1: Get single product by ID
         if( ValidationUtils.hasValue(idParam) ){
-            handleFindById(response, idParam);
+            long productId = RequestUtils.getRequiredLongParameter(request, "id");
+            handleFindById(response, productId);
             return;
         }
 
@@ -82,24 +83,13 @@ public class ProductServlet extends HttpServlet {
         handleDelete(request, response);
     }
 
-    private void handleFindById(HttpServletResponse response, String idParam) throws IOException {
+    private void handleFindById(HttpServletResponse response, Long productId) throws IOException {
         logger.info("ProductServlet#handleFindById -- START");
-        try {
-            long productId = Long.parseLong(idParam);
-            logger.info("Finding product with id of '{}'", productId);
 
-            ProductResponse product = productService.findById(productId);
-            if (product != null) {
-                logger.info("Found product: {}", product);
-                HttpResponseUtil.ok(response,product, "Successfully fetched product with '" + product.getId() + "' id");
-            } else {
-                logger.info("Product not found");
-                HttpResponseUtil.notFound(response, "Product not found");
-            }
-        } catch (NumberFormatException e) {
-            logger.info("ProductServlet#doGet -- NumberFormatException: {}", e.getMessage());
-            HttpResponseUtil.badRequest(response, "Invalid product id");
-        }
+        ProductResponse product = productService.findById(productId);
+
+        HttpResponseUtil.ok(response,product, "Successfully fetched product with '" + product.getId() + "' id");
+
         logger.info("ProductServlet#handleFindById -- END");
     }
 
@@ -151,16 +141,7 @@ public class ProductServlet extends HttpServlet {
 
     private void handleCreate(HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("ProductServlet#handleCreate -- START");
-        CreateProductRequest newProductRequest;
-
-        // Read JSON Body
-        try {
-            newProductRequest = JsonUtil.mapper()
-                    .readValue(request.getReader(), CreateProductRequest.class);
-        } catch (JsonProcessingException jpe) {
-            HttpResponseUtil.badRequest(response, "Invalid JSON request body");
-            return;
-        }
+        CreateProductRequest newProductRequest = RequestUtils.readBody(request, CreateProductRequest.class);
 
         Long productId = productService.create(newProductRequest);
 
@@ -174,15 +155,7 @@ public class ProductServlet extends HttpServlet {
 
     private void handleUpdate(HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("ProductServlet#handleUpdate -- START");
-        UpdateProductRequest prodRequest;
-
-        try{
-            prodRequest = JsonUtil.mapper()
-                    .readValue(request.getReader(), UpdateProductRequest.class);
-        } catch(JsonProcessingException jpe) {
-            HttpResponseUtil.badRequest(response, "Invalid JSON request body");
-            return;
-        }
+        UpdateProductRequest prodRequest = RequestUtils.readBody(request, UpdateProductRequest.class);;
 
         ProductResponse updatedProduct = productService.update(prodRequest);
 
@@ -196,20 +169,7 @@ public class ProductServlet extends HttpServlet {
 
     private void handleDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("ProductServlet#handleDelete -- START");
-        String idParam = request.getParameter("id");
-
-        if (!ValidationUtils.hasValue(idParam)) {
-            HttpResponseUtil.badRequest(response, "Product id is required");
-            return;
-        }
-
-        Long productId;
-        try {
-            productId = Long.parseLong(idParam);
-        } catch (NumberFormatException e) {
-            HttpResponseUtil.badRequest(response, "Invalid product id");
-            return;
-        }
+        Long productId = RequestUtils.getRequiredLongParameter(request, "id");
 
         productService.delete(productId);
 
