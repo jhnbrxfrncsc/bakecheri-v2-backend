@@ -1,71 +1,79 @@
-# Architecture
+# Request Flow
 
-## Overview
+```
+                 Client
+                    │
+                    ▼
+             Filter Chain
+                    │
+    ┌───────────────┼────────────────┐
+    │               │                │
+    ▼               ▼                ▼
+RequestLogging  CharacterEncoding  ExceptionHandling
+     Filter          Filter             Filter
+                    │
+                    ▼
+              ProductServlet
+                    │
+                    ▼
+              RequestUtils
+                    │
+                    ▼
+             ProductService
+                    │
+                    ▼
+           ProductValidator
+                    │
+                    ▼
+               ProductDAO
+                    │
+                    ▼
+             PostgreSQL Database
+```
 
-BakeCheri v2 follows a layered architecture.
-
-Client → Servlet → Service → DAO → PostgreSQL
-
----
-
-## Request Flow
-
-React
-
-↓
-
-Tomcat
-
-↓
-
-ProductServlet
-
-↓
-
-ProductService
-
-↓
-
-ProductDAO
-
-↓
-
-PostgreSQL
-
-↓
-
-JSON Response
+The response then propagates back through the same chain until it reaches the client.
 
 ---
 
-## Packages
+# Layer Responsibilities
 
-config
+## Servlet
 
-dao
-
-dto
-
-entity
-
-filter
-
-listener
-
-service
-
-servlet
-
-util
+- HTTP Request handling
+- Routing
+- Calls Service layer
 
 ---
 
-## Design Decisions
+## Service
 
-Why Servlets?
+- Business Logic
+- Validation
+- DTO ↔ Entity conversion
 
-Why JDBC?
+---
 
-Why PostgreSQL?
+## DAO
 
-Why no Spring?
+- SQL execution
+- JDBC interaction
+- Result mapping
+
+---
+
+## Filters
+
+- Logging
+- Character Encoding
+- Global Exception Handling
+
+---
+
+## Listener
+
+Responsible for application startup and shutdown events.
+
+Current responsibilities:
+
+- Initialize database connection pool
+- Shutdown HikariCP gracefully

@@ -11,60 +11,72 @@ public final class HttpResponseUtil {
         throw new AssertionError("Utility class cannot be instantiated.");
     }
 
-    public static void ok(HttpServletResponse response, Object data, String message) throws IOException {
+    private static void write(
+            HttpServletResponse response,
+            int status,
+            Object data,
+            String message
+    ) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(status);
+        boolean success = status >= 200 && status < 300;
 
-        JsonUtil.mapper().writeValue(response.getWriter(), new ApiResponse<>(true, data, message));
+        JsonUtil.mapper().writeValue(
+                response.getWriter(),
+                new ApiResponse<>(success, data, message)
+        );
+
     }
 
-    public static void created(HttpServletResponse response, Object data, String message) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_CREATED);
+    public static void ok(
+            HttpServletResponse response,
+            Object data,
+            String message)
+            throws IOException
+    {
+        write(response, HttpServletResponse.SC_OK, data, message);
+    }
 
-        JsonUtil.mapper().writeValue(response.getWriter(), new ApiResponse<>(true, data, message));
+    public static void created(
+            HttpServletResponse response,
+            Object data, String message)
+            throws IOException
+    {
+        write(response, HttpServletResponse.SC_CREATED, data, message);
     }
 
     public static void badRequest(
             HttpServletResponse response,
-            String message) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-
-        JsonUtil.mapper().writeValue(response.getWriter(), new ApiResponse<>(false, null, message));
+            String message) throws IOException
+    {
+        write(response, HttpServletResponse.SC_BAD_REQUEST, null, message);
     }
 
     public static void notFound(
             HttpServletResponse response,
-            String message) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            String message)
+            throws IOException
+    {
+        write(response, HttpServletResponse.SC_NOT_FOUND, null, message);
+    }
 
-        JsonUtil.mapper().writeValue(response.getWriter(), new ApiResponse<>(false, null, message));
+    public static void conflict(
+            HttpServletResponse response,
+            String message)
+            throws IOException
+    {
+        write(response,
+                HttpServletResponse.SC_CONFLICT,
+                null,
+                message);
     }
 
     public static void internalServerError(
             HttpServletResponse response,
-            String message) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-
-        JsonUtil.mapper().writeValue(response.getWriter(), new ApiResponse<>(false, null, message));
-    }
-
-    public static void writeError(
-            HttpServletResponse response,
-            int statusCode,
-            String message) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(statusCode);
-
-        JsonUtil.mapper().writeValue(response.getWriter(), new ApiResponse<>(false, null, message));
+            String message)
+            throws IOException
+    {
+        write(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, message);
     }
 }

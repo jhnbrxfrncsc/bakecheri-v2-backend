@@ -1,5 +1,6 @@
 package filter;
 
+import exception.BadRequestException;
 import exception.DatabaseException;
 import exception.ResourceNotFoundException;
 import exception.ValidationException;
@@ -18,18 +19,26 @@ public class ExceptionHandlingFilter implements Filter {
     @Override
     public void doFilter(
             ServletRequest request,
-            ServletResponse response,
+            ServletResponse responses,
             FilterChain chain)
             throws IOException, ServletException {
 
         HttpServletResponse res =
-                (HttpServletResponse) response;
+                (HttpServletResponse) responses;
 
         try {
 
-            chain.doFilter(request, response);
+            chain.doFilter(request, res);
 
         } catch (ValidationException ex) {
+
+            logger.warn("Request validation failed: {}", ex.getMessage());
+
+            HttpResponseUtil.badRequest(
+                    res,
+                    ex.getMessage());
+
+        } catch (BadRequestException ex) {
 
             logger.warn(ex.getMessage());
 
@@ -39,7 +48,7 @@ public class ExceptionHandlingFilter implements Filter {
 
         } catch (ResourceNotFoundException ex) {
 
-            logger.warn(ex.getMessage());
+            logger.warn("Resource not found: {}", ex.getMessage());
 
             HttpResponseUtil.notFound(
                     res,

@@ -93,6 +93,10 @@ public final class ValidationUtils {
         return value != null && !value.isBlank();
     }
 
+    public static boolean hasValue(Long value) {
+        return value != null && value <= 0;
+    }
+
     /*
        ===========================
        Number Validation

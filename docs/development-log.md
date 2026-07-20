@@ -921,3 +921,113 @@ While JDBC lacks automatic dirty checking, reusable helper utilities can produce
 - Add Filter and Listener implementations
 - Improve API documentation
 - Begin User module (Authentication)
+
+---
+---
+
+# <center>DAY FIVE</center>
+
+# Completed
+
+## Infrastructure
+
+- Added HealthServlet
+- Expanded RequestUtils
+- Completed HttpResponseUtil
+- Centralized JSON request parsing
+- Improved ExceptionHandlingFilter
+
+## Utilities
+
+### RequestUtils
+
+Added:
+
+- getRequiredParameter()
+- getOptionalParameter()
+- getRequiredLongParameter()
+- getOptionalLongParameter()
+- readBody()
+
+### HttpResponseUtil
+
+Added support for:
+
+- OK (200)
+- Created (201)
+- Bad Request (400)
+- Not Found (404)
+- Conflict (409)
+- Internal Server Error (500)
+
+## Exception Handling
+
+- Removed repetitive try-catch blocks from Servlets
+- Centralized exception handling using ExceptionHandlingFilter
+- Added proper mapping between exceptions and HTTP status codes
+
+## Health Endpoint
+
+Implemented:
+
+```
+GET /health
+```
+
+Returns:
+
+- application status
+- current timestamp
+
+## Refactoring
+
+- Cleaned ProductServlet
+- Reduced duplicated request parsing logic
+- Improved utility class design
+- Reviewed logging statements
+- Performed code cleanup across Product module
+
+---
+
+# Learned
+
+## Filters
+
+- Servlet Filters can intercept requests before reaching Servlets.
+- Multiple filters execute as a chain.
+- Filters are ideal for logging, exception handling, authentication, and encoding.
+
+## Request Utilities
+
+Centralizing request parsing reduces duplicated code and keeps Servlets focused on routing.
+
+## Global Exception Handling
+
+Handling exceptions in a single filter produces consistent API responses and significantly simplifies Servlets.
+
+---
+
+# Result
+
+The Product module is now feature complete with:
+
+- CRUD
+- Search
+- Category filtering
+- Popular filtering
+- Validation
+- DTOs
+- Generic API responses
+- Global exception handling
+- Request utilities
+- Filters
+- Listener
+- Health endpoint
+
+---
+
+# Next
+
+- Authentication
+- JWT
+- Users Module

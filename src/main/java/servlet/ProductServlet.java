@@ -26,10 +26,10 @@ public class ProductServlet extends HttpServlet {
         logger.info("ProductServlet#doGet -- START");
 
         // non-required query params
-        final String idParam = request.getParameter("id");
-        final String popularParam = request.getParameter("popular");
-        final String categoryParam = request.getParameter("category");
-        final String keywordParam = request.getParameter("search");
+        final Long idParam = RequestUtils.getOptionalLongParameter(request, "id");
+        final String popularParam = RequestUtils.getOptionalParameter(request, "popular");
+        final String categoryParam = RequestUtils.getOptionalParameter(request, "category");
+        final String keywordParam = RequestUtils.getOptionalParameter(request, "search");
 
 
         // Established priority: id -> popular -> category -> search -> findAll
@@ -110,7 +110,7 @@ public class ProductServlet extends HttpServlet {
         List<ProductResponse> categoryProducts = productService.findByCategory(category);
         String message = !categoryProducts.isEmpty()
                 ? "Retrieving products for category '" + category + "' was successful."
-                : "No existing records for products with '" + category + "'";
+                : "No existing records for products with '" + category + "' category";
         HttpResponseUtil.ok(response,categoryProducts, message);
 
         logger.info("ProductServlet#handleFindByCategory -- END");

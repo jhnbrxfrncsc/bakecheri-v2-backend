@@ -72,6 +72,12 @@
         <servlet-class>servlet.ProductServlet</servlet-class>
     </servlet>
 
+    <servlet>
+        <servlet-name>HealthServlet</servlet-name>
+        <servlet-class>servlet.HealthServlet</servlet-class>
+    </servlet>
+
+
 
     <!-- ===================================================== -->
     <!--                    Servlet Mapping                    -->
@@ -80,6 +86,11 @@
     <servlet-mapping>
         <servlet-name>ProductServlet</servlet-name>
         <url-pattern>/products</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>HealthServlet</servlet-name>
+        <url-pattern>/health</url-pattern>
     </servlet-mapping>
 
 </web-app>

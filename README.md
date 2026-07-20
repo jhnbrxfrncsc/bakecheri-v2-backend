@@ -1,121 +1,152 @@
-# <center>Introduction</center>
->This project is dedicated to migrate my original MERN backend project:<a href="https://bakecheri-client.vercel.app/"> BakeCheri </a> to pure Java Servlets, document every development days, implement production-inspired features, and later evolved the same project into Spring Boot and AWS.
+# <center>BakeCheri V2 Backend</center>
 
-## <center>Tech Stack</center>
-### Frontend:
-- ReactJS (Deployed in Vercel)
-### Backend:
+> BakeCheri V2 is a backend REST API built using **Java Servlets** as part of my backend engineering roadmap. This project recreates my original MERN backend while intentionally avoiding Spring Boot to deeply understand Java Web fundamentals such as HTTP, Servlets, Filters, Listeners, JDBC, Tomcat, and application architecture.
+
+---
+
+# Features
+
+## Product Module
+
+- CRUD Operations
+- Search Products
+- Filter by Category
+- Retrieve Popular Products
+
+## Request Processing
+
+- Servlet-based REST API
+- Global Exception Handling
+- Generic API Response
+- Request Utilities
+- Validation Utilities
+
+## Infrastructure
+
+- HikariCP Connection Pool
+- SLF4J Logging
+- Servlet Filters
+- Servlet Context Listener
+- Health Check Endpoint
+
+---
+
+# Tech Stack
+
+## Backend
+
 - Java 17
 - Jakarta Servlet API
-- Apache Tomcat
+- Apache Tomcat 10
 - PostgreSQL
 - JDBC
+- Jackson
 - HikariCP
-- Jackson Databind
-- SLF4J
+- SLF4J + Logback
+- Maven
 
-## <center>Features</center>
-## Implemented
+---
 
-### Product API
-- ✅ Get all products
-- ✅ Get product by ID
-- ✅ Search products
-- ✅ Filter by category
-- ✅ Get popular products
-- ✅ Create product
-- ✅ Update product
-- ✅ Delete product
+# Architecture
 
-### Backend Infrastructure
-- DTO mapping
-- Layered architecture
-- JDBC + HikariCP
-- PostgreSQL
-- Jackson JSON serialization
-- Generic API responses
-- Validation utilities
-- Custom exception hierarchy
-- Reusable update utilities
+See:
 
-## <center>API Endpoints</center>
-| Method  | Endpoint                  | Description               |
-|---------|---------------------------|---------------------------|
-| GET     | 	/products                | 	Get all products         |
-| GET     | 	/products?id=1           | 	Get product by ID        |
-| GET     | 	/products?popular=true   | 	Get popular products     |
-| GET     | 	/products?category=Cakes | 	Get products by category |
-| GET     | 	/products?search=ube     | 	Search products          |
-| POST    | 	/products                | 	Create product           |
-| PUT     | 	/products                | 	Update product           |
-| DELETE	 | /products?id=1            | 	Delete product           |
+- docs/architecture.md
 
+---
 
-## <center>Project Structure</center>
-src 
+# Documentation
 
-├── config
+- docs/api.md
+- docs/architecture.md
+- docs/decisions.md
+- docs/deployment.md
+- docs/development-log.md
 
-├── dao
+---
 
-├── dto
+# Current Progress
 
-├── entity
+## ✅ Completed
 
-├── exception
+- Product Module
+- CRUD
+- Search
+- Validation
+- Global Exception Handling
+- Filters
+- Listener
+- Health Endpoint
 
+## 🚧 Next
 
-├── mapper
+- Authentication
+- JWT
+- Users Module
+- Orders Module
+- Cart Module
+- Payments
 
-├── service
+---
 
-├── servlet
+# Running the Project
 
-├── util
+1. Clone repository
 
-└── validation
+```bash
+git clone https://github.com/yourusername/bakecheri-v2-backend.git
+```
 
-## <center>Progress</center>
+2.
 
-### Phase 1 — Backend Foundation
+Copy
 
-- [x] Project setup
-- [x] Tomcat deployment
-- [x] Database configuration
-- [x] HikariCP connection pool
-- [x] Product CRUD
-- [x] DTO mapping
-- [x] Validation framework
-- [x] Generic API response
-- [x] Custom exceptions
+```
+application.properties.example
+```
 
-### Phase 2 — Servlet Infrastructure
+to
 
-- [ ] Exception Handling Filter
-- [ ] Logging Filter
-- [ ] ServletContextListener
-- [ ] CORS Filter
+```
+application.properties
+```
 
-### Phase 3 — Authentication
+3.
 
-- [ ] User module
-- [ ] Login
-- [ ] Register
-- [ ] JWT Authentication
+Configure PostgreSQL credentials.
 
-### Phase 4 — Order Management
+4.
 
-- [ ] Cart
-- [ ] Orders
-- [ ] Order Items
+Run
 
+```
+scripts/run.bat
+```
 
-## <center>Architecture (link)</center>
+5.
 
-Documentation (links)
+Open
 
-Roadmap (link)
+```
+http://localhost:8080/BakeCheri_v2/health
+```
 
-Progress
+---
 
-How to Run
+# Learning Goal
+
+This project prioritizes learning backend fundamentals over rapid development.
+
+The long-term roadmap is:
+
+```
+Java Core
+    ↓
+Servlets
+    ↓
+Spring Framework
+    ↓
+Spring Boot
+    ↓
+AWS
+```
