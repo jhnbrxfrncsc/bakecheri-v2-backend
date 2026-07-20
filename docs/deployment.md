@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This document explains how to run BakeCheri V2 locally.
+This document explains how to build, configure, deploy, and run BakeCheri V2 locally.
 
 ---
 
@@ -34,44 +34,26 @@ Example:
 CREATE DATABASE bakecheri;
 ```
 
-Execute the SQL scripts located inside:
+Execute the SQL scripts in the following order:
 
-- First Script:
-```
-/sql/01_database.sql
-```
-- Second Script:
-```
-/sql/schema/02_products.sql
-```
-- Third Script:
-```
-/sql/schema/03_users.sql
-```
-- Fourth Script:
-```
-/sql/schema/04_cart.sql
-```
-- Fifth Script:
-```
-/sql/schema/05_cart_items.sql
-```
-- Sixth Script:
-```
-/sql/06_seed.sql
-```
+1. `/sql/01_database.sql`
+2. `/sql/schema/02_products.sql`
+3. `/sql/schema/03_users.sql`
+4. `/sql/schema/04_cart.sql`
+5. `/sql/schema/05_cart_items.sql`
+6. `/sql/06_seed.sql`
 
 ---
 
 # Configuration
 
-Create:
+Create the following file:
 
 ```
 src/main/resources/application.properties
 ```
 
-Example
+Example:
 
 ```properties
 db.url=jdbc:postgresql://localhost:5432/bakecheri
@@ -81,43 +63,60 @@ db.pool.max-size=10
 db.pool.min-idle=5
 ```
 
-This file is excluded from Git.
+This file is excluded from Git and should contain your local database configuration.
 
 ---
 
-# Build
+# Running the Application
+
+## Option 1 (Recommended for Windows)
+
+The project includes helper scripts located in:
+
+```
+scripts/
+```
+
+Available scripts:
+
+| Script | Description |
+|---------|-------------|
+| `start_tomcat.bat` | Builds the project, deploys the WAR to Tomcat, and starts Tomcat normally. |
+| `debug_tomcat.bat` | Builds the project, deploys the WAR, and starts Tomcat in JPDA debug mode for remote debugging from an IDE. |
+
+These scripts automate the build, deployment, and Tomcat startup process.
+
+---
+
+## Option 2 (Manual)
+
+### 1. Build the project using Maven:
 
 ```bash
 mvn clean package
 ```
-
 The generated WAR file will be located in:
-
-```
-target/
-```
-
----
-
-# Deploy
-
-Copy:
 
 ```
 target/BakeCheri_v2.war
 ```
 
-into
+### 2. Copy the generated WAR:
 
 ```
-Tomcat/webapps/
+target/BakeCheri_v2.war
 ```
 
-Start Tomcat.
+into your Tomcat deployment directory:
+
+```
+<TOMCAT_HOME>/webapps/
+```
+3. Start Apache Tomcat manually.
 
 ---
 
-# Verify
+# Verify Deployment
 
 Health endpoint:
 
@@ -125,7 +124,7 @@ Health endpoint:
 GET /BakeCheri_v2/health
 ```
 
-Expected response
+Expected response:
 
 ```json
 {
@@ -149,29 +148,106 @@ http://localhost:8080/BakeCheri_v2
 
 # Available Endpoints
 
-Products
+## Health
 
 ```
-GET    /products
-GET    /products?id=1
-GET    /products?category=Cake
-GET    /products?popular=true
-GET    /products?search=Chocolate
+GET /health
+```
 
-POST   /products
+---
 
-PUT    /products
+## Products
 
+Retrieve all products:
+
+```
+GET /products
+```
+
+Retrieve a product by ID:
+
+```
+GET /products?id=1
+```
+
+Retrieve products by category:
+
+```
+GET /products?category=Cake
+```
+
+Retrieve popular products:
+
+```
+GET /products?popular=true
+```
+
+Search products:
+
+```
+GET /products?search=Chocolate
+```
+
+Create a product:
+
+```
+POST /products
+```
+
+Update a product:
+
+```
+PUT /products
+```
+
+Delete a product:
+
+```
 DELETE /products?id=1
 ```
 
 ---
 
+# API Testing
+
+A ready-to-use Postman collection is included in:
+
+```
+postman/
+```
+
+The collection currently contains:
+
+## Health
+
+- GET `/health`
+
+## Products
+
+- POST `/products`
+- GET `/products`
+- PUT `/products`
+- DELETE `/products`
+
+The Product requests also include examples for:
+
+- Retrieve by ID
+- Retrieve by Category
+- Retrieve Popular Products
+- Search Products
+
+This allows the API to be tested immediately after deployment without manually creating requests.
+
+---
+
 # Logging
 
-Application logs use SLF4J + Logback.
+Application logging is implemented using:
 
-Configuration:
+- SLF4J
+- Logback
+
+Configuration file:
 
 ```
 src/main/resources/logback.xml
@@ -181,14 +257,14 @@ src/main/resources/logback.xml
 
 # Notes
 
-This project intentionally avoids Spring Boot.
+BakeCheri V2 intentionally avoids Spring Boot.
 
-The objective is to demonstrate how a production-style backend can be built using:
+The objective of this project is to demonstrate how a production-style Java backend can be built using:
 
 - Java
 - Servlets
 - JDBC
 - PostgreSQL
-- Tomcat
+- Apache Tomcat
 
-before migrating the same project to Spring Boot in the next version.
+before migrating the same application to Spring Boot in the next version (BakeCheri V3).
